@@ -1,0 +1,38 @@
+data=0x404
+dly=.05
+pcireg 0x400 0x1000
+while [ true ] ;
+do
+
+   pcireg $data 0
+   sleep $dly 
+
+   pcireg $data 1
+   sleep $dly 
+
+   pcireg $data 2
+   sleep $dly 
+
+   pcireg $data 4
+   sleep $dly 
+
+   pcireg $data 8
+   sleep $dly 
+
+   pcireg $data 0
+   sleep $dly 
+
+   pcireg $data 8
+   sleep $dly 
+
+   pcireg $data 4
+   sleep $dly 
+
+   pcireg $data 2
+   sleep $dly 
+
+   pcireg $data 1
+   sleep $dly 
+
+done
+

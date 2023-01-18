@@ -1,0 +1,15 @@
+# Fetch the upper 32-bits of the row count
+upper32=$(($1 >> 32))
+
+# Fetch the lower 32-bits of the row count
+lower32=$(($1 & 0xFFFFFFFF))
+
+pcireg 0x400 0x2000
+pcireg 0x404 $upper32
+
+pcireg 0x400 0x2004
+pcireg 0x404 $lower32
+
+pcireg 0x400 0x2008
+pcireg 0x404 1
+
