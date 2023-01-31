@@ -1,3 +1,32 @@
+#
+# If we're not in the "build" folder, make sure one exists
+# and then cd into it
+#
+if [ $(basename $PWD) != build ]; then
+  [ -d build ] || mkdir build
+  cd build
+fi
+
+
+#
+# Make ABSOLUTELY CERTAIN we are in the "build" folder
+#
+if [ $(basename $PWD) != build ]; then
+    echo "Not in a build folder!!"
+    exit 1
+fi
+
+#
+# If the user wants to clean the build...
+#
+if [ "$1" == "clean" ]; then
+    rm -rf *
+    exit 0
+fi
+
+#
+# Otherwise, make the build
+#
 cmake ..
 make
 
