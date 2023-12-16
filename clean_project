@@ -1,0 +1,18 @@
+script=script.tcl
+project=$(ls *.xpr)
+
+if [ -z $project ]; then
+   echo "No Vivado project found"
+   exit 1
+fi
+
+echo "open_project $project" >$script 
+echo "reset_project"        >>$script
+echo "close_project"        >>$script
+
+/tools/Xilinx/Vivado/2021.1/bin/vivado  2>&1 -nojournal -nolog -mode batch -source $script
+
+rm $script
+
+
+ 
