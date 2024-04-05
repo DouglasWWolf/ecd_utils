@@ -1,0 +1,83 @@
+#
+# This script performs a <complete> clean of a Vivado project.   Make sure you back up
+# the entire project folder prior to running this script!!
+#
+# This script could take anywhere between 10 minutes and two hours to run.
+# 
+
+top_level=top_level
+script=script.tcl
+
+run_script()
+{
+   local script=$1
+   local logfile=/tmp/scrub_$(basename $PWD).log
+   /tools/Xilinx/Vivado/2021.1/bin/vivado  2>&1 -nojournal -log $logfile -mode batch -source $script
+   #rm $script  
+}
+
+
+# Determine the name of the Vivado project file
+project_file=$(ls *.xpr)
+
+# Does the project file exist?
+if [ -z $project_file ]; then
+   echo "No Vivado project found"
+   exit 1
+fi
+
+# Get the base name of the project
+project="${project_file%.*}"
+
+# This is the name of the top_level_wrapper verilog file
+top_level_wrapper=$(pwd)/project.gen/sources_1/bd/${top_level}/hdl/${top_level}_wrapper.v
+
+# Create the TCL script that will remove the top-level wrapper
+cat <<EOT >script1.tcl
+open_project ${project}.xpr
+update_compile_order -fileset sources_1
+export_ip_user_files -of_objects  [get_files ${top_level_wrapper}] -no_script -reset -force -quiet
+remove_files  ${top_level_wrapper}
+file delete -force ${top_level_wrapper}
+update_compile_order -fileset sources_1
+close_project
+EOT
+
+# Remove the top-level wrapper file
+run_script script1.tcl
+
+# Throw away folders that we want rebuit from scratch
+rm -rf ${project}.cache ${project}.gen ${project}.runs
+
+# Create a folder where the top level verilog file will be generated
+mkdir -p project.gen/sources_1/bd/${top_level}
+
+# Create the TCL script that will recreate the contents of ${project}.gen 
+cat <<EOT >script2.tcl
+open_project ${project}.xpr
+update_compile_order -fileset sources_1
+reset_project
+make_wrapper -files [get_files project.srcs/sources_1/bd/${top_level}/${top_level}.bd] -top -force -quiet
+add_files -norecurse ${top_level_wrapper}
+update_compile_order -fileset sources_1
+set_property top ${top_level}_wrapper [current_fileset]
+close_project                                                        
+EOT
+
+# Re-create the contents of ${project}.gen
+run_script script2.tcl
+
+# Create the TCL script that will re-validate the top-level design
+cat <<EOT >script3.tcl
+open_project ${project}.xpr
+update_compile_order -fileset sources_1
+open_bd_design {project.srcs/sources_1/bd/${top_level}/${top_level}.bd}
+validate_bd_design -force
+update_compile_order -fileset sources_1
+save_bd_design                                                          
+close_project                                                        
+EOT
+
+# Re-validate the top-level design
+run_script script3.tcl
+
