@@ -5,29 +5,38 @@
 # This script could take anywhere between 10 minutes and two hours to run.
 # 
 
-top_level=top_level
-script=script.tcl
-
 run_script()
 {
    local script=$1
    local logfile=/tmp/scrub_$(basename $PWD).log
    /tools/Xilinx/Vivado/2021.1/bin/vivado  2>&1 -nojournal -log $logfile -mode batch -source $script
-   #rm $script  
+   rm $script  
 }
-
 
 # Determine the name of the Vivado project file
 project_file=$(ls *.xpr)
 
 # Does the project file exist?
-if [ -z $project_file ]; then
+if [ -z "$project_file" ]; then
    echo "No Vivado project found"
    exit 1
 fi
 
 # Get the base name of the project
 project="${project_file%.*}"
+
+# Find the name of the top level block design
+top_level_bd=$(find ${project}.srcs | grep "\.bd$")
+
+# Does a top-level block design exist?
+if [ -z "$top_level_bd" ]; then
+   echo "No top-level block design found"
+   exit 1
+fi
+
+# Find the name of the top-level board design
+top_level=$(basename $top_level_bd)
+top_level="${top_level%.*}"
 
 # This is the name of the top_level_wrapper verilog file
 top_level_wrapper=$(pwd)/project.gen/sources_1/bd/${top_level}/hdl/${top_level}_wrapper.v
@@ -80,4 +89,3 @@ EOT
 
 # Re-validate the top-level design
 run_script script3.tcl
-
