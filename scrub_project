@@ -59,14 +59,14 @@ run_script script1.tcl
 rm -rf ${project}.cache ${project}.gen ${project}.runs
 
 # Create a folder where the top level verilog file will be generated
-mkdir -p project.gen/sources_1/bd/${top_level}
+mkdir -p ${project}.gen/sources_1/bd/${top_level}
 
 # Create the TCL script that will recreate the contents of ${project}.gen 
 cat <<EOT >script2.tcl
 open_project ${project}.xpr
 update_compile_order -fileset sources_1
 reset_project
-make_wrapper -files [get_files project.srcs/sources_1/bd/${top_level}/${top_level}.bd] -top -force -quiet
+make_wrapper -files [get_files ${project}.srcs/sources_1/bd/${top_level}/${top_level}.bd] -top -force -quiet
 add_files -norecurse ${top_level_wrapper}
 update_compile_order -fileset sources_1
 set_property top ${top_level}_wrapper [current_fileset]
@@ -89,3 +89,11 @@ EOT
 
 # Re-validate the top-level design
 run_script script3.tcl
+
+
+# Remove all of the log-files
+find . | grep "\.log$" >logfiles.txt
+for f in $(cat logfiles.txt) ; do 
+  rm "$f"
+done
+rm logfiles.txt
