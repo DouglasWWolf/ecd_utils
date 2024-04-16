@@ -39,7 +39,7 @@ top_level=$(basename $top_level_bd)
 top_level="${top_level%.*}"
 
 # This is the name of the top_level_wrapper verilog file
-top_level_wrapper=$(pwd)/project.gen/sources_1/bd/${top_level}/hdl/${top_level}_wrapper.v
+top_level_wrapper=$(pwd)/${project}.gen/sources_1/bd/${top_level}/hdl/${top_level}_wrapper.v
 
 # Create the TCL script that will remove the top-level wrapper
 cat <<EOT >script1.tcl
