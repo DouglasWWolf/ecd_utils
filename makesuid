@@ -1,0 +1,3 @@
+sudo chown root $1
+sudo chgrp root $1
+sudo chmod 4777 $1
